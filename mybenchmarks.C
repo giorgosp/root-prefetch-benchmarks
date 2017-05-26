@@ -50,45 +50,67 @@ void writeTree(TTree* tree, int eventsNum = 100,  int bufferSize = 16000, int sp
     
     // Save tree header
     tree->Write();
+
+    delete event;
 }
 
 void readFile(bool async){}
 
-void mybenchmarks(){
+void mybenchmarks(int eventsNum = 100){
     char filename[] = "sample.root";
     char treeKey[] = "T";
     Event *event;
-    int eventsNum = 100;
+
+    struct ProcInfo_t procinfo;
+    gSystem->GetProcInfo(&procinfo);
+    cout << "RES memory at start of script " << procinfo.fMemResident << " KB" << endl; 
 
     // Write file
     TFile *file = new TFile(filename, "RECREATE");
     TTree *tree = new TTree(treeKey, "A tree with events for benchmarking");
     writeTree(tree, eventsNum);
     file->Close();
+    cout << "Written " << eventsNum << " events in " << file->GetBytesWritten() << " bytes" << endl;
     delete file;
-    printf("File written\n");
-
+    
     // Read with standard prefetch
-    printf("Read local file with standard prefetch\n");
+    printf("\nRead local file with standard prefetch\n");
+    printf("------------------------------------------------\n");
+    gSystem->GetProcInfo(&procinfo);
+    // Long_t start_memResident = procinfo.fMemResident;
+    cout << "RES memory before standard prefetch " << procinfo.fMemResident << " KB" << endl; 
+
     file = new TFile(filename, "READ");
     tree = (TTree*)file->Get(treeKey);
-    tree->SetAutoFlush(0);
     tree->SetCacheSize(-1);
     event = 0;
     tree->SetBranchAddress("EventBranch", &event);
     for (int i = 0; i < eventsNum; i++) 
         tree->GetEntry(i);
-    file->Close();
+
+    gSystem->GetProcInfo(&procinfo);
+    cout << "RES memory after standard prefetch  " << procinfo.fMemResident << " KB" << endl; 
+    
     printf("Read %lld bytes in %d transactions\n", file->GetBytesRead(), file->GetReadCalls());
+    file->Close();
+    delete file;
 
     // Read with asynchronous prefetch
-    printf("Read local file with asynchronous prefetch\n");
+    printf("\nRead local file with asynchronous prefetch\n");
+    printf("------------------------------------------------\n");
+    gSystem->GetProcInfo(&procinfo);
+    cout << "RES memory before asynchronous prefetch " << procinfo.fMemResident << " KB" << endl; 
+
     file = new TFile(filename, "READ");
     tree = (TTree*)file->Get(treeKey);
     event = 0;
     tree->SetBranchAddress("EventBranch", &event);
     for (int i = 0; i < eventsNum; i++) 
         tree->GetEntry(i);
-    file->Close();
+    gSystem->GetProcInfo(&procinfo);
+    cout << "RES memory after asynchronous prefetch  " << procinfo.fMemResident << " KB" << endl; 
+
     printf("Read %lld bytes in %d transactions\n", file->GetBytesRead(), file->GetReadCalls());
+    file->Close();
+    delete file;
 }
