@@ -147,12 +147,13 @@ void benchmark(Locality locality, Prefetching prefetching, string filename)
     delete file;
 }
 
-void mybenchmarks(int eventsNum = 100)
+void mybenchmarks(int eventsNum = 0)
 {
     gSystem->GetProcInfo(&procinfo);
     cout << "RES memory at start of script " << procinfo.fMemResident << " KB" << endl;
 
-    createFileLocal(eventsNum);
+    if (eventsNum > 0)
+        createFileLocal(eventsNum);
 
     benchmark(LOCAL, STANDARD, LOCAL_FILE);
     benchmark(LOCAL, ASYNC, LOCAL_FILE);
