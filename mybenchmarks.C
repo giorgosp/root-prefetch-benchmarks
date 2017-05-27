@@ -10,7 +10,9 @@ R__LOAD_LIBRARY(../test/libEvent.so)
 
 #define LOCAL_FILE "data/sample.root"
 // A file with 1000 events ~30mb
-#define REMOTE_FILE "https://drive.google.com/uc?export=download&id=0B5eWmoo5R47zck1WMUFaTjRWVE0"
+// #define REMOTE_FILE "https://drive.google.com/uc?export=download&id=0B5eWmoo5R47zck1WMUFaTjRWVE0"
+// #define REMOTE_FILE "https://www.dropbox.com/s/6dcxchmxrhuq4j1/sample.root?raw=1"
+#define REMOTE_FILE "http://127.0.0.1/sample.root"
 
 enum Locality
 {
@@ -114,24 +116,31 @@ void benchmark(Locality locality, Prefetching prefetching, string filename)
     else
         prefetchLabel = "ASYNC";
 
+    gEnv->SetValue("TFile.AsyncPrefetching", (int)prefetching == ASYNC);
+
     cout << "\nRead " << localityLabel << " file with " << prefetchLabel << " prefetch" << endl;
     printf("------------------------------------------------\n");
 
     gSystem->GetProcInfo(&procinfo);
     cout << "RES memory before: " << procinfo.fMemResident << " KB" << endl;
+    
+    TStopwatch stopwatch;
+    stopwatch.Start();
 
     auto file = TFile::Open(filename.c_str());
     auto tree = (TTree *)file->Get(TREE_KEY);
 
-    if (prefetching == STANDARD){
-        tree->SetAutoFlush(0);
-        tree->SetCacheSize(-1);
-    }
+    // TODO
+    // Before ROOT 6.04, TTreeCache it is not enabled by default
+    // https://sft.its.cern.ch/jira/browse/ROOT-7637
+    // tree->SetCacheSize();
 
     readTree(tree);
 
     gSystem->GetProcInfo(&procinfo);
     cout << "RES memory after:  " << procinfo.fMemResident << " KB" << endl;
+    cout << "REAL time       :  " << stopwatch.RealTime() << endl;
+    cout << "CPU time        :  " << stopwatch.CpuTime() << endl;
     printf("Read %lld bytes in %d transactions\n", file->GetBytesRead(), file->GetReadCalls());
 
     file->Close();
@@ -140,14 +149,17 @@ void benchmark(Locality locality, Prefetching prefetching, string filename)
 
 void mybenchmarks(int eventsNum = 100)
 {
-    // todo measure cpu time
     gSystem->GetProcInfo(&procinfo);
     cout << "RES memory at start of script " << procinfo.fMemResident << " KB" << endl;
 
     createFileLocal(eventsNum);
+
     benchmark(LOCAL, STANDARD, LOCAL_FILE);
     benchmark(LOCAL, ASYNC, LOCAL_FILE);
     
-    benchmark(REMOTE, STANDARD, REMOTE_FILE);
-    benchmark(REMOTE, ASYNC, REMOTE_FILE);
+    // todo ROOT's http client doesn't work.
+    // Tried file from google drive, dropbox and local http server.
+    // The REMOTE_FILE url works in browser but not with TFile::Open()
+    // benchmark(REMOTE, STANDARD, REMOTE_FILE);
+    // benchmark(REMOTE, ASYNC, REMOTE_FILE);
 }
