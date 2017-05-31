@@ -1,5 +1,5 @@
 // Running the benchmarks
-// root -l -q "mybenchmarks.C()" : runs the benchmarks on an existing root files
+// root -l -q "mybenchmarks.C()" : runs the benchmarks on existing root files
 // root -l -q "mybenchmarks.C(1000)" : Recreates a local file with 1000 events and runs the benchmarks on existing root files
 
 
