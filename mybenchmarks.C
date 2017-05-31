@@ -1,3 +1,8 @@
+// Running the benchmarks
+// root -l -q "mybenchmarks.C()" : runs the benchmarks on an existing root file
+// root -l -q "mybenchmarks.C(1000)" : Recreates a local file with 1000 events and runs the benchmarks on it
+
+
 // This part is available only in ROOT6. For ROOT 5, use something like
 // root -l -q -e "gSystem->Load(\"../test/libEvent.so\");" mybenchmarks.C
 R__LOAD_LIBRARY(../test/libEvent.so)
@@ -8,13 +13,10 @@ R__LOAD_LIBRARY(../test/libEvent.so)
 
 #define TREE_KEY "T"
 
-#define LOCAL_FILE "localhost:///Users/gio/dev/gsoc2017/mymacros/data/sample.root"
-// A file with 1000 events ~30mb
+#define LOCAL_FILE "sample.root"
 // #define REMOTE_FILE "https://drive.google.com/uc?export=download&id=0B5eWmoo5R47zck1WMUFaTjRWVE0"
-// #define REMOTE_FILE "https://www.dropbox.com/s/6dcxchmxrhuq4j1/sample.root?raw=1"
-#define REMOTE_FILE "http://127.0.0.1:8080/sample.root/"
-// #define REMOTE_FILE "http://lcg-heppkg.web.cern.ch/lcg-heppkg/ROOT/eventdata.root"
-// #define REMOTE_FILE "root://127.0.0.1:1094//Users/gio/dev/gsoc2017/mymacros/data/sample.root"
+#define REMOTE_FILE "https://www.dropbox.com/s/6dcxchmxrhuq4j1/sample.root?raw=1"
+// #define REMOTE_FILE "http://127.0.0.1:8080/sample.root/"
 
 enum Locality
 {
