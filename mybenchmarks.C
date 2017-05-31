@@ -8,11 +8,13 @@ R__LOAD_LIBRARY(../test/libEvent.so)
 
 #define TREE_KEY "T"
 
-#define LOCAL_FILE "data/sample.root"
+#define LOCAL_FILE "localhost:///Users/gio/dev/gsoc2017/mymacros/data/sample.root"
 // A file with 1000 events ~30mb
 // #define REMOTE_FILE "https://drive.google.com/uc?export=download&id=0B5eWmoo5R47zck1WMUFaTjRWVE0"
 // #define REMOTE_FILE "https://www.dropbox.com/s/6dcxchmxrhuq4j1/sample.root?raw=1"
-#define REMOTE_FILE "http://127.0.0.1/sample.root"
+#define REMOTE_FILE "http://127.0.0.1:8080/sample.root/"
+// #define REMOTE_FILE "http://lcg-heppkg.web.cern.ch/lcg-heppkg/ROOT/eventdata.root"
+// #define REMOTE_FILE "root://127.0.0.1:1094//Users/gio/dev/gsoc2017/mymacros/data/sample.root"
 
 enum Locality
 {
@@ -98,8 +100,10 @@ void readTree(TTree *tree)
     Event *event = 0;
     tree->SetBranchAddress("EventBranch", &event);
     auto eventsNum = tree->GetEntries();
-    for (int i = 0; i < eventsNum; i++)
+    for (int i = 0; i < eventsNum; i++){
+        // usleep(1000 * 80);
         tree->GetEntry(i);
+    }
 }
 
 void benchmark(Locality locality, Prefetching prefetching, string filename)
@@ -116,6 +120,8 @@ void benchmark(Locality locality, Prefetching prefetching, string filename)
     else
         prefetchLabel = "ASYNC";
 
+    // Works only for remote files
+    // https://sft.its.cern.ch/jira/browse/ROOT-7637
     gEnv->SetValue("TFile.AsyncPrefetching", (int)prefetching == ASYNC);
 
     cout << "\nRead " << localityLabel << " file with " << prefetchLabel << " prefetch" << endl;
@@ -128,11 +134,14 @@ void benchmark(Locality locality, Prefetching prefetching, string filename)
     stopwatch.Start();
 
     auto file = TFile::Open(filename.c_str());
+    if(file == 0){
+        cout << "Error: Cannot open file " << REMOTE_FILE << endl;
+      return;
+    }
     auto tree = (TTree *)file->Get(TREE_KEY);
 
     // TODO
     // Before ROOT 6.04, TTreeCache it is not enabled by default
-    // https://sft.its.cern.ch/jira/browse/ROOT-7637
     // tree->SetCacheSize();
 
     readTree(tree);
@@ -161,6 +170,6 @@ void mybenchmarks(int eventsNum = 0)
     // todo ROOT's http client doesn't work.
     // Tried file from google drive, dropbox and local http server.
     // The REMOTE_FILE url works in browser but not with TFile::Open()
-    // benchmark(REMOTE, STANDARD, REMOTE_FILE);
-    // benchmark(REMOTE, ASYNC, REMOTE_FILE);
+    benchmark(REMOTE, STANDARD, REMOTE_FILE);
+    benchmark(REMOTE, ASYNC, REMOTE_FILE);
 }
