@@ -1,0 +1,30 @@
+
+Processing mybenchmarks.C(1000)...
+RES memory at start of script 96120 KB
+Written 1000 events in 31933794 bytes
+
+Read LOCAL file with STANDARD prefetch
+------------------------------------------------
+RES memory before: 135052 KB
+RES memory after:  169716 KB
+REAL time       :  0.939538
+CPU time        :  0.86
+Read 34947978 bytes in 27 transactions
+
+Read LOCAL file with ASYNC prefetch
+------------------------------------------------
+RES memory before: 114112 KB
+RES memory after:  148324 KB
+REAL time       :  0.747413
+CPU time        :  0.69
+Read 34947978 bytes in 27 transactions
+
+Read REMOTE file with STANDARD prefetch
+------------------------------------------------
+RES memory before: 114204 KB
+Error: Cannot open file https://www.dropbox.com/s/6dcxchmxrhuq4j1/sample.root?raw=1
+
+Read REMOTE file with ASYNC prefetch
+------------------------------------------------
+RES memory before: 115584 KB
+Error: Cannot open file https://www.dropbox.com/s/6dcxchmxrhuq4j1/sample.root?raw=1
