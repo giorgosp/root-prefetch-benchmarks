@@ -1,6 +1,6 @@
 // Running the benchmarks
-// root -l -q "mybenchmarks.C()" : runs the benchmarks on an existing root file
-// root -l -q "mybenchmarks.C(1000)" : Recreates a local file with 1000 events and runs the benchmarks on it
+// root -l -q "mybenchmarks.C()" : runs the benchmarks on an existing root files
+// root -l -q "mybenchmarks.C(1000)" : Recreates a local file with 1000 events and runs the benchmarks on existing root files
 
 
 // This part is available only in ROOT6. For ROOT 5, use something like
