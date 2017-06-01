@@ -9,14 +9,12 @@ R__LOAD_LIBRARY(../test/libEvent.so)
 
 #include <iostream>
 
-#include "Event.h"
+#include "../test/Event.h"
 
 #define TREE_KEY "T"
 
 #define LOCAL_FILE "sample.root"
-// #define REMOTE_FILE "https://drive.google.com/uc?export=download&id=0B5eWmoo5R47zck1WMUFaTjRWVE0"
-#define REMOTE_FILE "https://www.dropbox.com/s/6dcxchmxrhuq4j1/sample.root?raw=1"
-// #define REMOTE_FILE "http://127.0.0.1:8080/sample.root/"
+#define REMOTE_FILE "http://test-gsoc.web.cern.ch/test-gsoc/sample.root"
 
 enum Locality
 {
@@ -102,7 +100,7 @@ void readTree(TTree *tree)
     Event *event = 0;
     tree->SetBranchAddress("EventBranch", &event);
     auto eventsNum = tree->GetEntries();
-    for (int i = 0; i < eventsNum; i++){
+    for (Long64_t i = 0; i < eventsNum; i++){
         // usleep(1000 * 80);
         tree->GetEntry(i);
     }
@@ -124,7 +122,7 @@ void benchmark(Locality locality, Prefetching prefetching, string filename)
 
     // Works only for remote files
     // https://sft.its.cern.ch/jira/browse/ROOT-7637
-    gEnv->SetValue("TFile.AsyncPrefetching", (int)prefetching == ASYNC);
+    gEnv->SetValue("TFile.AsyncPrefetching", (int)(prefetching == ASYNC));
 
     cout << "\nRead " << localityLabel << " file with " << prefetchLabel << " prefetch" << endl;
     printf("------------------------------------------------\n");
@@ -169,9 +167,6 @@ void mybenchmarks(int eventsNum = 0)
     benchmark(LOCAL, STANDARD, LOCAL_FILE);
     benchmark(LOCAL, ASYNC, LOCAL_FILE);
     
-    // todo ROOT's http client doesn't work.
-    // Tried file from google drive, dropbox and local http server.
-    // The REMOTE_FILE url works in browser but not with TFile::Open()
     benchmark(REMOTE, STANDARD, REMOTE_FILE);
     benchmark(REMOTE, ASYNC, REMOTE_FILE);
 }
