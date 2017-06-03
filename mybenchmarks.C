@@ -13,160 +13,67 @@ R__LOAD_LIBRARY(../test/libEvent.so)
 
 #define TREE_KEY "T"
 
-#define LOCAL_FILE "sample.root"
-#define REMOTE_FILE "http://test-gsoc.web.cern.ch/test-gsoc/sample.root"
+// #define LOCAL_FILE "sample.root"
+// #define REMOTE_FILE "http://test-gsoc.web.cern.ch/test-gsoc/sample.root"
 
-enum Locality
-{
-    LOCAL,
-    REMOTE
-};
-
-enum Prefetching
-{
-    STANDARD,
-    ASYNC
-};
+enum Prefetching { STANDARD, ASYNC };
 
 using namespace std;
-
-
-struct ProcInfo_t procinfo;
-
-void writeTree(TTree *tree, int eventsNum = 100, int bufferSize = 16000, int splitLevel = 99)
-{
-    Event *event = new Event();
-
-    tree->Branch("EventBranch", "Event", &event, bufferSize, splitLevel);
-
-    char etype[20];
-    for (Int_t i = 0; i < eventsNum; i++)
-    {
-        Float_t sigmat, sigmas;
-        gRandom->Rannor(sigmat, sigmas);
-        Int_t ntrack = Int_t(600 + 600 * sigmat / 120.);
-        Float_t random = gRandom->Rndm(1);
-        sprintf(etype, "type%d", i % 5);
-        event->SetType(etype);
-        event->SetHeader(i, 200, 960312, random);
-        event->SetNseg(Int_t(10 * ntrack + 20 * sigmas));
-        event->SetNvertex(Int_t(1 + 20 * gRandom->Rndm()));
-        event->SetFlag(UInt_t(random + 0.5));
-        event->SetTemperature(random + 20.);
-        for (UChar_t m = 0; m < 10; m++)
-        {
-            event->SetMeasure(m, Int_t(gRandom->Gaus(m, m + 1)));
-        }
-
-        // fill the matrix
-        for (UChar_t i0 = 0; i0 < 4; i0++)
-        {
-            for (UChar_t i1 = 0; i1 < 4; i1++)
-            {
-                event->SetMatrix(i0, i1, gRandom->Gaus(i0 * i1, 1));
-            }
-        }
-        // create and fill the Track objects
-        for (Int_t t = 0; t < ntrack; t++)
-            event->AddTrack(random);
-
-        // Fill the tree
-        tree->Fill();
-
-        // Clear before reloading event
-        event->Clear();
-    }
-
-    // Save tree header
-    tree->Write();
-
-    delete event;
-}
-
-// Write a tree to a local file
-void createFileLocal(int eventsNum)
-{
-    TFile *file = new TFile(LOCAL_FILE, "RECREATE");
-    TTree *tree = new TTree(TREE_KEY, "A tree with events for benchmarking");
-    writeTree(tree, eventsNum);
-    file->Close();
-    cout << "Written " << eventsNum << " events in " << file->GetBytesWritten() << " bytes" << endl;
-    delete file;
-}
 
 // Read events from the tree into memory
 void readTree(TTree *tree)
 {
     Event *event = 0;
-    tree->SetBranchAddress("EventBranch", &event);
-    auto eventsNum = tree->GetEntries();
-    for (Long64_t i = 0; i < eventsNum; i++){
-        // usleep(1000 * 80);
+    // TODO read from branches
+    // tree->SetBranchAddress("EventBranch", &event);
+    auto nentries = tree->GetEntries();
+    for (Long64_t i = 0; i < nentries; i++){
+        // gSystem->Sleep(200)
         tree->GetEntry(i);
     }
 }
 
-void benchmark(Locality locality, Prefetching prefetching, string filename)
+void mybenchmarks(string filename, Prefetching prefetching, int cachesize)
 {
-    string localityLabel;
-    if (locality == LOCAL)
-        localityLabel = "LOCAL";
-    else
-        localityLabel = "REMOTE";
+    bool isLocalFile = filename.find("https:") == 0 || filename.find("http:") == 0 || filename.find("root:") == 0;
+    string localityLabel = isLocalFile ? "REMOTE" : "LOCAL";
 
-    string prefetchLabel;
-    if (prefetching == STANDARD)
-        prefetchLabel = "STANDARD";
-    else
-        prefetchLabel = "ASYNC";
+    string prefetchLabel = (prefetching == Prefetching::STANDARD) ? "STANDARD" : "ASYNC";
 
     // Works only for remote files
     // https://sft.its.cern.ch/jira/browse/ROOT-7637
-    gEnv->SetValue("TFile.AsyncPrefetching", (int)(prefetching == ASYNC));
+    gEnv->SetValue("TFile.AsyncPrefetching", (int)(prefetching == Prefetching::ASYNC));
 
     cout << "\nRead " << localityLabel << " file with " << prefetchLabel << " prefetch" << endl;
     printf("------------------------------------------------\n");
 
+    struct ProcInfo_t procinfo;
     gSystem->GetProcInfo(&procinfo);
-    cout << "RES memory before: " << procinfo.fMemResident << " KB" << endl;
+    Long_t start_fMemResident = procinfo.fMemResident;
+    // cout << "RES memory before: " << procinfo.fMemResident << " KB" << endl;
+    // cout << "Virtual memory before: " << procinfo.fMemVirtual << " KB" << endl;
     
     TStopwatch stopwatch;
     stopwatch.Start();
 
     auto file = TFile::Open(filename.c_str());
     if(file == 0){
-        cout << "Error: Cannot open file " << REMOTE_FILE << endl;
+        cout << "Error: Cannot open file " << filename << endl;
       return;
     }
+    
     auto tree = (TTree *)file->Get(TREE_KEY);
-
     // TODO
-    // Before ROOT 6.04, TTreeCache it is not enabled by default
+    // auto-flush setting of 100 and read it back using a TTreeCache of the same size.
     // tree->SetCacheSize();
-
     readTree(tree);
 
     gSystem->GetProcInfo(&procinfo);
-    cout << "RES memory after:  " << procinfo.fMemResident << " KB" << endl;
-    cout << "REAL time       :  " << stopwatch.RealTime() << endl;
-    cout << "CPU time        :  " << stopwatch.CpuTime() << endl;
+    cout << "RES memory :  " << procinfo.fMemResident - start_fMemResident << " KB" << endl;
+    cout << "REAL time  :  " << stopwatch.RealTime() << endl;
+    cout << "CPU time   :  " << stopwatch.CpuTime() << endl;
     printf("Read %lld bytes in %d transactions\n", file->GetBytesRead(), file->GetReadCalls());
 
     file->Close();
     delete file;
-}
-
-void mybenchmarks(int eventsNum = 0)
-{
-    gSystem->GetProcInfo(&procinfo);
-    cout << "RES memory at start of script " << procinfo.fMemResident << " KB" << endl;
-
-    if (eventsNum > 0)
-        createFileLocal(eventsNum);
-
-    benchmark(LOCAL, STANDARD, LOCAL_FILE);
-    benchmark(LOCAL, ASYNC, LOCAL_FILE);
-    
-    benchmark(REMOTE, STANDARD, REMOTE_FILE);
-    benchmark(REMOTE, ASYNC, REMOTE_FILE);
 }
