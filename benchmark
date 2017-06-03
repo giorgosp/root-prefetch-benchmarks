@@ -1,0 +1,15 @@
+#!/bin/bash
+
+CACHESIZE_100=100*1000*10000 # 100 MB
+CACHESIZE_ZERO=0
+
+while (( "$#" )); do
+
+root -l -q -b "mybenchmarks.C(\"$1\", Prefetching::STANDARD, $CACHESIZE_100)";
+root -l -q -b "mybenchmarks.C(\"$1\", Prefetching::STANDARD, $CACHESIZE_ZERO)";
+
+root -l -q -b "mybenchmarks.C(\"$1\", Prefetching::ASYNC, $CACHESIZE_100)";
+root -l -q -b "mybenchmarks.C(\"$1\", Prefetching::ASYNC, $CACHESIZE_ZERO)";
+
+shift
+done

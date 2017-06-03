@@ -1,10 +1,9 @@
-// This part is available only in ROOT6. For ROOT 5, use something like
-// root -l -q -e "gSystem->Load(\"../test/libEvent.so\");" mybenchmarks.C
-R__LOAD_LIBRARY(../test/libEvent.so)
+// The directory with libEvent.so should be in LD_LIBRARY_PATH
+R__LOAD_LIBRARY(libEvent.so)
 
 #include <iostream>
 
-#include "../test/Event.h"
+#include "Event.h"
 
 #define TREE_KEY "T"
 
@@ -31,15 +30,15 @@ void readTree(TTree *tree)
 void mybenchmarks(string filename, Prefetching prefetching, int cachesize)
 {
     bool isLocalFile = filename.find("https:") == 0 || filename.find("http:") == 0 || filename.find("root:") == 0;
-    string localityLabel = isLocalFile ? "REMOTE" : "LOCAL";
+    std::string localityLabel = isLocalFile ? "REMOTE" : "LOCAL";
 
-    string prefetchLabel = (prefetching == Prefetching::STANDARD) ? "STANDARD" : "ASYNC";
+    std::string prefetchLabel = (prefetching == Prefetching::STANDARD) ? "STANDARD" : "ASYNC";
 
     // Works only for remote files
     // https://sft.its.cern.ch/jira/browse/ROOT-7637
     gEnv->SetValue("TFile.AsyncPrefetching", (int)(prefetching == Prefetching::ASYNC));
 
-    cout << "\nRead " << localityLabel << " file with " << prefetchLabel << " prefetch" << endl;
+    printf("\nRead %s file with %s prefetch and CACHE SIZE %d\n", localityLabel.c_str(), prefetchLabel.c_str(), cachesize);
     printf("------------------------------------------------\n");
 
     struct ProcInfo_t procinfo;
