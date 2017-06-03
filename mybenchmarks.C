@@ -1,8 +1,3 @@
-// Running the benchmarks
-// root -l -q "mybenchmarks.C()" : runs the benchmarks on existing root files
-// root -l -q "mybenchmarks.C(1000)" : Recreates a local file with 1000 events and runs the benchmarks on existing root files
-
-
 // This part is available only in ROOT6. For ROOT 5, use something like
 // root -l -q -e "gSystem->Load(\"../test/libEvent.so\");" mybenchmarks.C
 R__LOAD_LIBRARY(../test/libEvent.so)
@@ -57,11 +52,11 @@ void mybenchmarks(string filename, Prefetching prefetching, int cachesize)
     stopwatch.Start();
 
     auto file = TFile::Open(filename.c_str());
-    if(file == 0){
+    if (file == 0) {
         cout << "Error: Cannot open file " << filename << endl;
-      return;
+        return;
     }
-    
+
     auto tree = (TTree *)file->Get(TREE_KEY);
     // TODO
     // auto-flush setting of 100 and read it back using a TTreeCache of the same size.

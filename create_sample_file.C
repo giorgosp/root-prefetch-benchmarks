@@ -129,11 +129,16 @@ void create_sample_file(std::string filename, int nevents, int nbranches)
 {
     if (nevents == 0 || nbranches == 0)
     {
-        std::cout << "Number of events and branches cannot be 0";
+        std::cout << "Error: Number of events and branches cannot be 0" << std::endl;
         return;
     }
 
     TFile *file = new TFile(filename.c_str(), "RECREATE");
+    if(file == 0){
+        std::cout << "Error: Cannot open file " << filename << std::endl;
+        return;
+    }
+
     TTree *tree = new TTree(TREE_KEY, "A tree with events for benchmarking");
     writeTree(tree, nevents, nbranches);
     file->Close();
