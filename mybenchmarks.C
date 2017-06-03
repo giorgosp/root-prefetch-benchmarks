@@ -8,8 +8,8 @@ R__LOAD_LIBRARY(../test/libEvent.so)
 
 #define TREE_KEY "T"
 
-// #define LOCAL_FILE "sample.root"
-// #define REMOTE_FILE "http://test-gsoc.web.cern.ch/test-gsoc/sample.root"
+#define LOCAL_FILE "sample.root"
+#define REMOTE_FILE "http://test-gsoc.web.cern.ch/test-gsoc/sample.root"
 
 enum Prefetching { STANDARD, ASYNC };
 
@@ -58,9 +58,7 @@ void mybenchmarks(string filename, Prefetching prefetching, int cachesize)
     }
 
     auto tree = (TTree *)file->Get(TREE_KEY);
-    // TODO
-    // auto-flush setting of 100 and read it back using a TTreeCache of the same size.
-    // tree->SetCacheSize();
+    tree->SetCacheSize(cachesize);
     readTree(tree);
 
     gSystem->GetProcInfo(&procinfo);

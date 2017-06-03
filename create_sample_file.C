@@ -92,9 +92,9 @@ void fillComplexBranches(TTree *tree, int nbranches, int nentries, int splitleve
                 event->SetMeasure(m, Int_t(gRandom->Gaus(m, m + 1)));
             
             // fill the matrix
-            // for (UChar_t i0 = 0; i0 < 4; i0++)
-            //     for (UChar_t i1 = 0; i1 < 4; i1++)
-            //         event->SetMatrix(i0, i1, gRandom->Gaus(i0 * i1, 1));
+            for (UChar_t i0 = 0; i0 < 4; i0++)
+                for (UChar_t i1 = 0; i1 < 4; i1++)
+                    event->SetMatrix(i0, i1, gRandom->Gaus(i0 * i1, 1));
             
             // create and fill the Track objects
             for (Int_t t = 0; t < ntrack; t++)
