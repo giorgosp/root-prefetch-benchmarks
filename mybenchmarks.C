@@ -14,17 +14,52 @@ enum Prefetching { STANDARD, ASYNC };
 
 using namespace std;
 
+void readBranches(TTree *tree, std::string base_branch_name, Long64_t nbranches_to_read)
+{
+    for (Long64_t b = 0; b < nbranches_to_read; b++)
+    {
+        std::string branch_name = base_branch_name + std::to_string(b) + ".";
+        auto branch = tree->GetBranch(branch_name.c_str());
+        Long64_t branch_entries = branch->GetEntries();
+        for (Long64_t i = 0; i < branch_entries; i++)
+            branch->GetEntry(i);
+    }
+}
+
+void readSimpleBranches(TTree *tree, Long64_t nbranches){
+    // read approximately 2/3 of entries of 2/3 of the branches. 2/3 is arbitrary.
+    Long64_t nbranches_to_read = nbranches*(2/3);
+    std::string base_branch_name = "SimpleBranch";
+    readBranches(tree, base_branch_name, nbranches_to_read);
+}
+
+void readArrayBranches(TTree *tree, Long64_t nbranches){
+    // read approximately 2/3 of entries of 2/3 of the branches. 2/3 is arbitrary.
+    Long64_t nbranches_to_read = nbranches*(2/3);
+    std::string base_branch_name = "ArrayBranch";
+    readBranches(tree, base_branch_name, nbranches_to_read);
+}
+
+void readComplexBranches(TTree *tree, Long64_t nbranches, int splitlevel){
+    // read approximately 2/3 of entries of 2/3 of the branches. 2/3 is arbitrary.
+    Long64_t nbranches_to_read = nbranches*(2/3);
+    std::string base_branch_name = "EventBranch" +  std::to_string(splitlevel) + "_";
+    readBranches(tree, base_branch_name, nbranches_to_read);
+}
+
 // Read events from the tree into memory
 void readTree(TTree *tree)
 {
     Event *event = 0;
-    // TODO read from branches
-    // tree->SetBranchAddress("EventBranch", &event);
-    auto nentries = tree->GetEntries();
-    for (Long64_t i = 0; i < nentries; i++){
-        // gSystem->Sleep(200)
-        tree->GetEntry(i);
-    }
+    
+    Long64_t nentries = tree->GetEntries();
+    Int_t nbranches = tree->GetNbranches();
+    int branches_per_type = nbranches / 4; // don't about the float division result
+
+    readSimpleBranches(tree, branches_per_type);
+    readArrayBranches(tree, branches_per_type);
+    readComplexBranches(tree, branches_per_type, 99);
+    readComplexBranches(tree, branches_per_type, 1);
 }
 
 void mybenchmarks(string filename, Prefetching prefetching, int cachesize)

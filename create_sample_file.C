@@ -62,7 +62,6 @@ void fillArrayBranches(TTree *tree, int nbranches, int nentries){
 void fillComplexBranches(TTree *tree, int nbranches, int nentries, int splitlevel){
     // Create  branches whose leaves hold Event objects
     cout << "Writing complex branches with " << nbranches << " branches" << " of " << nentries << " entries each..." << endl;
-    // cout << nbranches << " " << nentries << endl;
     
     TString baseBranchName = "EventBranch" +  std::to_string(splitlevel) + "_";
 
