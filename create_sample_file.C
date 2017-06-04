@@ -42,7 +42,7 @@ void fillArrayBranches(TTree *tree, int nbranches, int nentries){
     // Create  branches whose leaves hold arrays
     TString baseBranchName = "ArrayBranch";
 
-    int array_len = 10;
+    int array_len = 1000;
     Float_t  f[array_len];
 
     for (int b = 0; b < nbranches; b++) {
@@ -70,7 +70,6 @@ void fillComplexBranches(TTree *tree, int nbranches, int nentries, int splitleve
 
     for (int b = 0; b < nbranches; b++) {
         TString branchName = baseBranchName + std::to_string(b) + ".";
-        // cout << branchName << endl;
         auto branch = tree->Branch(branchName, "Event", &event, 32000, splitlevel);
         
         for (Int_t i = 0; i < nentries; i++)
