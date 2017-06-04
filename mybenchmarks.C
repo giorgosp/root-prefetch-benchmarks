@@ -20,7 +20,7 @@ void readBranches(TTree *tree, std::string base_branch_name, Long64_t nbranches_
     {
         std::string branch_name = base_branch_name + std::to_string(b) + ".";
         auto branch = tree->GetBranch(branch_name.c_str());
-        Long64_t branch_entries = branch->GetEntries();
+        Long64_t branch_entries = branch->GetEntries() * (2 / 3);
         for (Long64_t i = 0; i < branch_entries; i++)
             branch->GetEntry(i);
     }
@@ -28,7 +28,7 @@ void readBranches(TTree *tree, std::string base_branch_name, Long64_t nbranches_
 
 void readSimpleBranches(TTree *tree, Long64_t nbranches){
     // read approximately 2/3 of entries of 2/3 of the branches. 2/3 is arbitrary.
-    Long64_t nbranches_to_read = nbranches*(2/3);
+    Long64_t nbranches_to_read = nbranches * (2 / 3);
     std::string base_branch_name = "SimpleBranch";
     readBranches(tree, base_branch_name, nbranches_to_read);
 }
@@ -50,8 +50,6 @@ void readComplexBranches(TTree *tree, Long64_t nbranches, int splitlevel){
 // Read events from the tree into memory
 void readTree(TTree *tree)
 {
-    Event *event = 0;
-    
     Long64_t nentries = tree->GetEntries();
     Int_t nbranches = tree->GetNbranches();
     int branches_per_type = nbranches / 4; // don't about the float division result
