@@ -21,6 +21,11 @@ type. The number of events in the tree will never surpass the number given as ar
 - Complex branches with split level 99: These branches will be filled with objects of the Event class.
 - Complex branches with split level 1: These branches will be filled with objects of the Event class.
 
+### File size
+Running the command `root -l -q "create_sample_file.C(\"sample.root\", 20000, 2000)"` which creates
+a file with 20K events and 2K branches, the file size is about 330MB. So, the way of writing a file
+doesn't create large files.
+
 
 ## Reading the files and running the benchmarks
 The `benchmark` shell script can be used to run the benchmarks and read the files. It can be used like
