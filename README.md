@@ -22,9 +22,19 @@ type. The number of events in the tree will never surpass the number given as ar
 - Complex branches with split level 1: These branches will be filled with objects of the Event class.
 
 
-## Reading the files
+## Reading the files and running the benchmarks
 The `benchmark` shell script can be used to run the benchmarks and read the files. It can be used like
 `./benchmark file1 [file2]`.
+For each file, the benchmark script runs 4 benchmarks:
+```
+root -l -q -b "mybenchmarks.C(\"$1\", Prefetching::STANDARD, $CACHESIZE_100)";
+root -l -q -b "mybenchmarks.C(\"$1\", Prefetching::STANDARD, $CACHESIZE_ZERO)";
+
+root -l -q -b "mybenchmarks.C(\"$1\", Prefetching::ASYNC, $CACHESIZE_100)";
+root -l -q -b "mybenchmarks.C(\"$1\", Prefetching::ASYNC, $CACHESIZE_ZERO)";
+```
+i.e. reads the files with standard or async prefetch and with TTreeCache of 100mb or 0.
+
 To read the files, the benchmark script reads the 2/3 of branches of each branch type, and for each branch
 it reads the 2/3 of its entries, i.e it will read the 2/3 of the entries of the 2/3 of the simple branches,
 2/3 of the entries of the 2/3 of the array branches, etc.
