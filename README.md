@@ -50,3 +50,8 @@ Long64_t branch_entries = branch->GetEntries() * (2 / 3);
         for (Long64_t i = 0; i < branch_entries; i++)
             branch->GetEntry(i);
 ```
+
+## Event class
+The scripts depend on the $ROOTSYS/test/Event.h class. To make it available in the benchmarks one 
+should run `make` inside the `$ROOTSYS/test/` directory and append this directory to the `LD_LIBRARY_PATH`
+environment variable.
