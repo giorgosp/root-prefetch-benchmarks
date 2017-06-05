@@ -7,6 +7,8 @@ R__LOAD_LIBRARY(libEvent.so)
 
 #define TREE_KEY "T"
 
+#define READ_QUOTA 0.66 // read approximately 2/3 of entries of 2/3 of the branches. 2/3 is arbitrary.
+
 #define LOCAL_FILE "sample.root"
 #define REMOTE_FILE "http://test-gsoc.web.cern.ch/test-gsoc/sample.root"
 
@@ -14,37 +16,33 @@ enum Prefetching { STANDARD, ASYNC };
 
 using namespace std;
 
-void readBranches(TTree *tree, std::string base_branch_name, Long64_t nbranches_to_read)
+void readBranches(TTree *tree, std::string base_branch_name, Long64_t nbranches)
 {
+    Long64_t nbranches_to_read = ceil(nbranches * READ_QUOTA);
+
     for (Long64_t b = 0; b < nbranches_to_read; b++)
     {
         std::string branch_name = base_branch_name + std::to_string(b) + ".";
         auto branch = tree->GetBranch(branch_name.c_str());
-        Long64_t branch_entries = branch->GetEntries() * (2 / 3);
+        Long64_t branch_entries = ceil(branch->GetEntries() * READ_QUOTA);
         for (Long64_t i = 0; i < branch_entries; i++)
             branch->GetEntry(i);
     }
 }
 
 void readSimpleBranches(TTree *tree, Long64_t nbranches){
-    // read approximately 2/3 of entries of 2/3 of the branches. 2/3 is arbitrary.
-    Long64_t nbranches_to_read = nbranches * (2 / 3);
     std::string base_branch_name = "SimpleBranch";
-    readBranches(tree, base_branch_name, nbranches_to_read);
+    readBranches(tree, base_branch_name, nbranches);
 }
 
 void readArrayBranches(TTree *tree, Long64_t nbranches){
-    // read approximately 2/3 of entries of 2/3 of the branches. 2/3 is arbitrary.
-    Long64_t nbranches_to_read = nbranches*(2/3);
     std::string base_branch_name = "ArrayBranch";
-    readBranches(tree, base_branch_name, nbranches_to_read);
+    readBranches(tree, base_branch_name, nbranches);
 }
 
 void readComplexBranches(TTree *tree, Long64_t nbranches, int splitlevel){
-    // read approximately 2/3 of entries of 2/3 of the branches. 2/3 is arbitrary.
-    Long64_t nbranches_to_read = nbranches*(2/3);
     std::string base_branch_name = "EventBranch" +  std::to_string(splitlevel) + "_";
-    readBranches(tree, base_branch_name, nbranches_to_read);
+    readBranches(tree, base_branch_name, nbranches);
 }
 
 // Read events from the tree into memory
