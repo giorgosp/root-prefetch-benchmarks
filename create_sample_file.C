@@ -1,7 +1,7 @@
-R__LOAD_LIBRARY(../test/libEvent.so)
+R__LOAD_LIBRARY(libEvent.so)
 
 #include <iostream>
-#include "../test/Event.h"
+#include "Event.h"
 
 #define TREE_KEY "T"
 
