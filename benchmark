@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CACHESIZE_100=100*1000*10000 # 100 MB
+CACHESIZE_100=100*1000*1000 # 100 MB
 CACHESIZE_ZERO=0
 
 while (( "$#" )); do
