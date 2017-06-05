@@ -17,7 +17,7 @@ type. The number of events in the tree will never surpass the number given as ar
 `create_sample_file` macro. The types of the branches are:
 - Simple branches: Each of these branches will contain 4 simple fields. 2 float and 2 integer fields. The
     branch is created like so: `tree->Branch(branchName, &event, "fTemperature/F:fNtrack/I:fNseg:fFlag/i");`
-- Array branches: Each of these branches will contain an array of 10 float fields.
+- Array branches: Each of these branches will contain an array of 1000 float fields.
 - Complex branches with split level 99: These branches will be filled with objects of the Event class.
 - Complex branches with split level 1: These branches will be filled with objects of the Event class.
 
