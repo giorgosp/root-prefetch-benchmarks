@@ -18,15 +18,17 @@ using namespace std;
 
 void readBranches(TTree *tree, std::string base_branch_name, Long64_t nbranches)
 {
+    Long64_t branch_entries = ceil((tree->GetEntries() / 4.0 / nbranches) * READ_QUOTA);
     Long64_t nbranches_to_read = ceil(nbranches * READ_QUOTA);
-
-    for (Long64_t b = 0; b < nbranches_to_read; b++)
+    
+    for (Long64_t i = 0; i < branch_entries; i++)
     {
-        std::string branch_name = base_branch_name + std::to_string(b) + ".";
-        auto branch = tree->GetBranch(branch_name.c_str());
-        Long64_t branch_entries = ceil(branch->GetEntries() * READ_QUOTA);
-        for (Long64_t i = 0; i < branch_entries; i++)
+        for (Long64_t b = 0; b < nbranches_to_read; b++)
+        {
+            std::string branch_name = base_branch_name + std::to_string(b) + ".";
+            auto branch = tree->GetBranch(branch_name.c_str());
             branch->GetEntry(i);
+        }
     }
 }
 
@@ -50,7 +52,7 @@ void readTree(TTree *tree)
 {
     Long64_t nentries = tree->GetEntries();
     Int_t nbranches = tree->GetNbranches();
-    int branches_per_type = nbranches / 4; // don't about the float division result
+    int branches_per_type = nbranches / 4; // don't care about the float division result
 
     readSimpleBranches(tree, branches_per_type);
     readArrayBranches(tree, branches_per_type);
