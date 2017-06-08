@@ -1,7 +1,8 @@
 # ROOT file prefetching benchmarks
 
 In short, to run the benchmarks one has to create a sample file with the `create_sample_file` macro and then
-run the benchmark script as  `./benchmark some_local_file.root some_remote_file.root`.
+run the benchmark script as  `./benchmark some_local_file.root 2` where 2 is the number that is benchmark
+will be executed.
 
 ## Creating a file for benchmarks
 A file suitable for the benchmarks can be created by the `create_sample_file.C` macro.
@@ -29,7 +30,7 @@ doesn't create large files.
 
 ## Reading the files and running the benchmarks
 The `benchmark` shell script can be used to run the benchmarks and read the files. It can be used like
-`./benchmark file1 [file2]`.
+`./benchmark file1 [times to run]`.
 For each file, the benchmark script runs 4 benchmarks:
 ```
 root -l -q -b "mybenchmarks.C(\"$1\", Prefetching::STANDARD, $CACHESIZE_100)";
@@ -46,9 +47,15 @@ it reads the 2/3 of its entries, i.e it will read the 2/3 of the entries of the 
 
 This snippet shows how the entries are read. It will run for the 2/3 of the branches of each type.
 ```
-Long64_t branch_entries = branch->GetEntries() * (2 / 3);
-        for (Long64_t i = 0; i < branch_entries; i++)
+for (Long64_t i = 0; i < nentries_per_branch; i++)
+    {
+        for (Long64_t b = 0; b < nbranches; b++)
+        {
+            std::string branch_name = base_branch_name + std::to_string(b) + ".";
+            auto branch = tree->GetBranch(branch_name.c_str());
             branch->GetEntry(i);
+        }
+    }
 ```
 
 ## Event class
