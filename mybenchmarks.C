@@ -24,7 +24,8 @@ void readBranches(TTree *tree, std::string base_branch_name, Long64_t nbranches,
         {
             std::string branch_name = base_branch_name + std::to_string(b) + ".";
             auto branch = tree->GetBranch(branch_name.c_str());
-            branch->GetEntry(i);
+            Long64_t local_entry =  tree->LoadTree(i);
+            branch->GetEntry(local_entry);
         }
     }
 }
@@ -61,6 +62,9 @@ void readTree(TTree *tree)
 
 void mybenchmarks(string filename, Prefetching prefetching, int cachesize)
 {
+    // TODO 
+    // spit out benchmarks in csv format at the end of the script only
+    // spit out benchmarks only if file.size == file.bytesRead (but dont read 2/3) otherwise abort benchmark
     bool isLocalFile = filename.find("https:") == 0 || filename.find("http:") == 0 || filename.find("root:") == 0;
     std::string localityLabel = isLocalFile ? "REMOTE" : "LOCAL";
 
