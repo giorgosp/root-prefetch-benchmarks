@@ -34,7 +34,7 @@ void readBranches(TTree *tree, std::string base_branch_name, Long64_t nbranches,
 void readTree(TTree *tree)
 {
     // get a sample of entries per branch
-    std::string branch_name = "SimpleBranch" + std::to_string(0) + ".";
+    std::string branch_name = "ArrayBranch" + std::to_string(0) + ".";
     auto branch = tree->GetBranch(branch_name.c_str());
     Long64_t nentries_per_branch = branch->GetEntries();
 
@@ -42,13 +42,14 @@ void readTree(TTree *tree)
     nentries_per_branch = ceil(nentries_per_branch * READ_QUOTA);
 
     Int_t nbranches = tree->GetNbranches();
-    Long64_t nbranches_per_type = nbranches / 4; 
+    Long64_t nbranches_per_type = nbranches / 3; 
     
     // Read some portion of the branches
     nbranches_per_type = ceil(nbranches_per_type * READ_QUOTA);
 
-    std::string base_branch_name = "SimpleBranch";
-    readBranches(tree, base_branch_name, nbranches_per_type, nentries_per_branch);
+    std::string base_branch_name;
+    // base_branch_name = "SimpleBranch";
+    // readBranches(tree, base_branch_name, nbranches_per_type, nentries_per_branch);
     
     base_branch_name = "ArrayBranch";
     readBranches(tree, base_branch_name, nbranches_per_type, nentries_per_branch);
