@@ -7,7 +7,7 @@ R__LOAD_LIBRARY(libEvent.so)
 
 #define TREE_KEY "T"
 
-#define READ_QUOTA 0.66 // read approximately 2/3 of entries of 2/3 of the branches. 2/3 is arbitrary.
+#define READ_QUOTA 1 //0.66 // read approximately 2/3 of entries of 2/3 of the branches. 2/3 is arbitrary.
 
 #define LOCAL_FILE "sample.root"
 #define REMOTE_FILE "http://test-gsoc.web.cern.ch/test-gsoc/sample.root"
@@ -18,14 +18,23 @@ using namespace std;
 
 void readBranches(TTree *tree, std::string base_branch_name, Long64_t nbranches, Long64_t nentries_per_branch)
 {
+
+    // keep all needed branches in memory
+    TBranch *branches[nbranches];
+    for (Long64_t b = 0; b < nbranches; b++)
+    {
+        std::string branch_name = base_branch_name + std::to_string(b) + ".";
+        branches[b] = tree->GetBranch(branch_name.c_str());
+    }
+
     for (Long64_t i = 0; i < nentries_per_branch; i++)
     {
         for (Long64_t b = 0; b < nbranches; b++)
         {
-            std::string branch_name = base_branch_name + std::to_string(b) + ".";
-            auto branch = tree->GetBranch(branch_name.c_str());
-            Long64_t local_entry =  tree->LoadTree(i);
-            branch->GetEntry(local_entry);
+            auto branch = branches[b];
+            tree->LoadTree(i);
+            branch->GetEntry(i);
+            // std::cout << "read entry " << i << " from " << branch->GetName() << std::endl;
         }
     }
 }
@@ -54,11 +63,11 @@ void readTree(TTree *tree)
     base_branch_name = "ArrayBranch";
     readBranches(tree, base_branch_name, nbranches_per_type, nentries_per_branch);
 
-    base_branch_name = "EventBranch" +  std::to_string(99) + "_";
-    readBranches(tree, base_branch_name, nbranches_per_type, nentries_per_branch);
+    // base_branch_name = "EventBranch" +  std::to_string(99) + "_";
+    // readBranches(tree, base_branch_name, nbranches_per_type, nentries_per_branch);
 
-    base_branch_name = "EventBranch" +  std::to_string(1) + "_";
-    readBranches(tree, base_branch_name, nbranches_per_type, nentries_per_branch);
+    // base_branch_name = "EventBranch" +  std::to_string(1) + "_";
+    // readBranches(tree, base_branch_name, nbranches_per_type, nentries_per_branch);
 }
 
 void mybenchmarks(string filename, Prefetching prefetching, int cachesize)
