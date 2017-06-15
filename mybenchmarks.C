@@ -18,7 +18,7 @@ using namespace std;
 
 void readBranches(TTree *tree, std::string base_branch_name, Long64_t nbranches, Long64_t nentries_per_branch)
 {
-    cout << nbranches << " " << nentries_per_branch << std::endl;
+    // cout << nbranches << " " << nentries_per_branch << std::endl;
     // keep all needed branches in memory
     TBranch *branches[nbranches];
     for (Long64_t b = 0; b < nbranches; b++)
