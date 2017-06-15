@@ -39,23 +39,26 @@ void fillSimpleBranches(TTree *tree, int nbranches, int nentries){
 void fillArrayBranches(TTree *tree, int nbranches, int nentries){
     cout << "Writing array branches with " << nbranches << " branches" << " of " << nentries << " entries each..." << endl;
 
-    // Create  branches whose leaves hold arrays
-    TString baseBranchName = "ArrayBranch";
+    int array_len = 100;
+    Float_t  f[nbranches][array_len];
 
-    int array_len = 100000;
-    Float_t  f[array_len];
+    // keep all needed branches in memory
+    std::string base_branch_name = "ArrayBranch";
+    TBranch *branches[nbranches];
+    for (Long64_t b = 0; b < nbranches; b++)
+    {
+        std::string branch_name = base_branch_name + std::to_string(b) + ".";
+        branches[b] = tree->Branch(branch_name.c_str(), &(f[b][0]), "f[100]/F");
+    }
 
-    for (int b = 0; b < nbranches; b++) {
-        // Create branches ArrayBranch.  ArrayBranch. etc
-        TString branchName = baseBranchName + (Long_t)b + ".";
-        auto branch = tree->Branch(branchName, f, "f[100000]/F");
-        
-        for (int i = 0; i < nentries; i++) {
-            for (int i = 0; i < array_len; i++)
-                f[i] = gRandom->Rndm();
-            
-            branch->Fill();
+    for (int i = 0; i < nentries; i++)
+    {
+        for (int b = 0; b < nbranches; b++)
+        {
+            for (int j = 0; j < array_len; j++)
+                f[b][j] = gRandom->Rndm();
         }
+        tree->Fill();
     }
 }
 
@@ -109,15 +112,18 @@ void writeTree(TTree *tree, int nevents, int nbranches)
 {
     // Fill a TTree with different types of branches
 
-    int types = 3;
+    // int types = 3;
+    int types = 1;
     int nbranches_per_type = ceil(nbranches/(float)types);
     int nentries_per_type = ceil(nevents/(float)types);
     int nentries_per_branch = ceil(nentries_per_type / (float)nbranches_per_type);
 
+    tree->SetAutoFlush(100);
+
     // fillSimpleBranches(tree, nbranches_per_type, nentries_per_branch);
     fillArrayBranches(tree, nbranches_per_type, nentries_per_branch);
-    fillComplexBranches(tree, nbranches_per_type, nentries_per_branch, 99);
-    fillComplexBranches(tree, nbranches_per_type, nentries_per_branch, 1);
+    // fillComplexBranches(tree, nbranches_per_type, nentries_per_branch, 99);
+    // fillComplexBranches(tree, nbranches_per_type, nentries_per_branch, 1);
 
     tree->Write();
 }

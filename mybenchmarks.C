@@ -18,7 +18,7 @@ using namespace std;
 
 void readBranches(TTree *tree, std::string base_branch_name, Long64_t nbranches, Long64_t nentries_per_branch)
 {
-
+    cout << nbranches << " " << nentries_per_branch << std::endl;
     // keep all needed branches in memory
     TBranch *branches[nbranches];
     for (Long64_t b = 0; b < nbranches; b++)
@@ -32,6 +32,7 @@ void readBranches(TTree *tree, std::string base_branch_name, Long64_t nbranches,
         for (Long64_t b = 0; b < nbranches; b++)
         {
             auto branch = branches[b];
+            // tree->AddBranchToCache(branches[b], kTRUE);
             tree->LoadTree(i);
             branch->GetEntry(i);
             // std::cout << "read entry " << i << " from " << branch->GetName() << std::endl;
@@ -51,7 +52,8 @@ void readTree(TTree *tree)
     nentries_per_branch = ceil(nentries_per_branch * READ_QUOTA);
 
     Int_t nbranches = tree->GetNbranches();
-    Long64_t nbranches_per_type = nbranches / 3; 
+    // Long64_t nbranches_per_type = nbranches / 3; 
+    Long64_t nbranches_per_type = nbranches / 1; 
     
     // Read some portion of the branches
     nbranches_per_type = ceil(nbranches_per_type * READ_QUOTA);
