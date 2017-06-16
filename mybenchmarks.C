@@ -45,6 +45,7 @@ void readTree(TTree *tree)
 {
     // get a sample of entries per branch
     std::string branch_name = "ArrayBranch" + std::to_string(0) + ".";
+    // std::string branch_name = "EventBranch" +  std::to_string(99) + "_1.";
     auto branch = tree->GetBranch(branch_name.c_str());
     Long64_t nentries_per_branch = branch->GetEntries();
 

@@ -40,7 +40,10 @@ void fillArrayBranches(TTree *tree, int nbranches, int nentries){
     cout << "Writing array branches with " << nbranches << " branches" << " of " << nentries << " entries each..." << endl;
 
     int array_len = 100;
-    Float_t  f[nbranches][array_len];
+    // Float_t  f[nbranches][array_len];
+    Float_t **f = new Float_t *[nbranches];
+    for (int i = 0; i < nbranches; ++i)
+        f[i] = new Float_t[array_len];
 
     // keep all needed branches in memory
     std::string base_branch_name = "ArrayBranch";
@@ -60,6 +63,10 @@ void fillArrayBranches(TTree *tree, int nbranches, int nentries){
         }
         tree->Fill();
     }
+
+    for (int i = 0; i < nbranches; ++i)
+        delete[] f[i];
+    delete[] f;
 }
 
 void fillComplexBranches(TTree *tree, int nbranches, int nentries, int splitlevel){
@@ -101,37 +108,39 @@ void fillComplexBranches(TTree *tree, int nbranches, int nentries, int splitleve
             for (Int_t t = 0; t < ntrack; t++)
                 event->AddTrack(random);
 
-            branch->Fill();
+            tree->Fill();
             event->Clear();
         }
     }
     delete event;
 }
 
-void writeTree(TTree *tree, int nevents, int nbranches)
+void writeTree(TTree *tree, int nentries, int nbranches)
 {
     // Fill a TTree with different types of branches
 
-    // int types = 3;
-    int types = 1;
-    int nbranches_per_type = ceil(nbranches/(float)types);
-    int nentries_per_type = ceil(nevents/(float)types);
-    int nentries_per_branch = ceil(nentries_per_type / (float)nbranches_per_type);
-
     tree->SetAutoFlush(100);
+    fillArrayBranches(tree, nbranches, nentries);
+
+    // int types = 3;
+    // int nbranches_per_type = ceil(nbranches/(float)types);
+    // int nentries_per_type = ceil(nevents/(float)types);
+    // int nentries_per_branch = ceil(nentries_per_type / (float)nbranches_per_type);
+
 
     // fillSimpleBranches(tree, nbranches_per_type, nentries_per_branch);
-    fillArrayBranches(tree, nbranches_per_type, nentries_per_branch);
-    // fillComplexBranches(tree, nbranches_per_type, nentries_per_branch, 99);
+    // fillArrayBranches(tree, nbranches_per_type, nentries_per_branch);
+
+    // fillComplexBranches(tree, nbranches_per_type, nevents, 99);
     // fillComplexBranches(tree, nbranches_per_type, nentries_per_branch, 1);
 
     tree->Write();
 }
 
 // Write a tree to a local file
-void create_sample_file(std::string filename, int nevents, int nbranches)
+void create_sample_file(std::string filename, int nentries, int nbranches)
 {
-    if (nevents == 0 || nbranches == 0)
+    if (nentries == 0 || nbranches == 0)
     {
         std::cout << "Error: Number of events and branches cannot be 0" << std::endl;
         return;
@@ -144,8 +153,8 @@ void create_sample_file(std::string filename, int nevents, int nbranches)
     }
 
     TTree *tree = new TTree(TREE_KEY, "A tree with events for benchmarking");
-    writeTree(tree, nevents, nbranches);
+    writeTree(tree, nentries, nbranches);
     file->Close();
-    cout << "Written " << nevents << " events in " << file->GetBytesWritten() << " bytes" << endl;
+    cout << "Written " << nentries << " events in " << file->GetBytesWritten() << " bytes" << endl;
     delete file;
 }
