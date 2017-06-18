@@ -6,36 +6,6 @@ R__LOAD_LIBRARY(libEvent.so)
 #define TREE_KEY "T"
 
 
-void fillSimpleBranches(TTree *tree, int nbranches, int nentries){
-    cout << "Writing simple branches with " << nbranches << " branches" << " of " << nentries << " entries each..." << endl;
-
-    TString baseBranchName = "SimpleBranch";
-
-    Event *event = new Event();
-
-    for (int b = 0; b < nbranches; b++) {
-        // Create branches SimpleBranch0.  SimpleBranch1. etc
-        TString branchName = baseBranchName + (Long_t)b + ".";
-        auto branch = tree->Branch(branchName, &event, "fTemperature/F:fNtrack/I:fNseg:fFlag/i");
-
-        for (int i = 0; i < nentries; i++) {
-            Float_t sigmat, sigmas;
-            gRandom->Rannor(sigmat, sigmas);
-            Int_t ntrack = Int_t(600 + 600 * sigmat / 120.);
-            
-            auto random = gRandom->Rndm();
-            event->SetTemperature(random + 20.);
-            event->SetNtrack(ntrack);
-            event->SetNseg(Int_t(10 * ntrack + 20 * sigmas));
-            event->SetFlag(UInt_t(random + 0.5));
-
-            branch->Fill();
-            event->Clear();
-        }
-    }
-    delete event;
-}
-
 void fillArrayBranches(TTree *tree, int nbranches, int nentries){
     cout << "Writing array branches with " << nbranches << " branches" << " of " << nentries << " entries each..." << endl;
 
@@ -58,8 +28,11 @@ void fillArrayBranches(TTree *tree, int nbranches, int nentries){
     {
         for (int b = 0; b < nbranches; b++)
         {
-            for (int j = 0; j < array_len; j++)
+            for (int j = 0; j < array_len / 2; j++)
                 f[b][j] = gRandom->Rndm();
+
+            for (int j = array_len / 2; j < array_len; j++)
+                f[b][j] = 0;
         }
         tree->Fill();
     }
@@ -120,7 +93,10 @@ void writeTree(TTree *tree, int nentries, int nbranches)
     // Fill a TTree with different types of branches
 
     tree->SetAutoFlush(100);
-    fillArrayBranches(tree, nbranches, nentries);
+
+    int nbranches_per_type = nbranches / 2;
+    fillArrayBranches(tree, nbranches_per_type, nentries);
+    fillComplexBranches(tree, nbranches_per_type, nentries, 3);
 
     // int types = 3;
     // int nbranches_per_type = ceil(nbranches/(float)types);
@@ -151,6 +127,8 @@ void create_sample_file(std::string filename, int nentries, int nbranches)
         std::cout << "Error: Cannot open file " << filename << std::endl;
         return;
     }
+
+    file->SetCompressionLevel(3);
 
     TTree *tree = new TTree(TREE_KEY, "A tree with events for benchmarking");
     writeTree(tree, nentries, nbranches);
