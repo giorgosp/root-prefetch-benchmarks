@@ -44,11 +44,11 @@ void fillArrayBranches(TTree *tree, int nbranches, int nentries){
 
 void fillComplexBranches(TTree *tree, int nbranches, int nentries, int splitlevel){
     // Create  branches whose leaves hold Event objects
-    cout << "Writing complex branches with " << nbranches << " branches" << " of " << nentries << " entries each..." << endl;
+    cout << "Writing complex branches with " << nbranches << " branches" << " of " << nentries << " entries each and split level " << splitlevel << " ..." << endl;
     
     TString baseBranchName = "EventBranch" +  std::to_string(splitlevel) + "_";
 
-    char etype[20];
+    char etype[10];
     Event *event = new Event();
 
     for (int b = 0; b < nbranches; b++) {
@@ -96,7 +96,7 @@ void writeTree(TTree *tree, int nentries, int nbranches)
 
     int nbranches_per_type = nbranches / 2;
     fillArrayBranches(tree, nbranches_per_type, nentries);
-    fillComplexBranches(tree, nbranches_per_type, nentries, 3);
+    fillComplexBranches(tree, nbranches_per_type, nentries, 1);
 
     // int types = 3;
     // int nbranches_per_type = ceil(nbranches/(float)types);
