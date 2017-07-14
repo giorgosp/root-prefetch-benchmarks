@@ -30,7 +30,8 @@ i.e.  alternating between reads with standard or async prefetch and using a TTre
 For the benchmarks, all entries of the Tree are read, in entry-wise order. i.e. The first entry of all branches will be read, then the second entry of all branches, etc.
 
 ## Results
-The average results of the benchmarks on a remote file through HTTP can be seen below:
+
+The average results of the benchmarks on a ~7gb remote file, with 10k events and 2k branches, accessed through HTTP, can be seen below:
 
 ```
 Read REMOTE file with STANDARD prefetch and CACHE SIZE 100000000
@@ -62,4 +63,4 @@ Avg CPU time  : 881,5
 Read 7238513277 bytes in 202004 transactions
 ```
 
-It is obvious that using a cache is better than not using one at all.  Also, it can be observed that reading a remote file with asynchronous prefetching is faster than standard prefetch and it uses a bit more memory.
+It is obvious that using a ROOT Tree Cache is better than not using one at all.  Reading a remote file with asynchronous prefetching is faster than with standard prefetching, but it uses a bit more memory.
